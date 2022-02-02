@@ -1,0 +1,5 @@
+/node_modules
+.wakatime-project
+.env
+.eslintrc.json
+Back.sh
