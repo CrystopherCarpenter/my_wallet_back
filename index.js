@@ -40,7 +40,7 @@ app.post("/signin", async (req, res) => {
 
     await db.collection("sessions").insertOne({ token, userId: user._id });
 
-    res.send(token);
+    res.send({ token });
   } else {
     res.sendStatus(401);
   }
@@ -65,7 +65,6 @@ app.get("/mywallet", async (req, res) => {
   const user = await db.collection("users").findOne({ _id: session.userId });
 
   userRecords.forEach((record) => {
-    delete record._id;
     delete record.userId;
   })
 
@@ -90,9 +89,7 @@ app.post("/newdata", async (req, res) => {
 
   await db.collection("records").insertOne({ ...record, userId: session.userId });
 
-  const sessions =  await db.collection("sessions").find({}).toArray();
-
-  res.send(sessions);
+  res.sendStatus(201);
 
 });
 
@@ -111,7 +108,7 @@ app.post("/logout", async (req, res) => {
   
   await db.collection("sessions").deleteOne({ token });
   
-  return res.sendStatus(200);
+  return res.sendStatus(201);
 })
 
 app.listen(5000);
