@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
 import joi from "joi";
+import { stripHtml } from "string-strip-html";
 import dayjs from "dayjs";
 
 dotenv.config();
@@ -20,14 +21,52 @@ mongoClient.connect(() => {
   db = mongoClient.db("my_wallet");
 });
 
+const signupSchema = joi.object({
+  name: joi.string()
+      .alphanum()
+      .min(3)
+      .max(30)
+      .required(),
+
+  password: joi.string()
+    .pattern(/^[a-zA-Z0-9]{3,30}$/)
+    .required(),
+
+  email: joi.string()
+    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    .required()
+})
+
+const newDataSchema = joi.object({
+  value: joi.number()
+    .positive()
+    .required(),
+  
+    description: joi.string()
+    .required(),
+
+  type: joi.string()
+    .required()
+})
+
 app.post("/signup", async (req, res) => {
   const user = req.body;
 
+  const validation = signupSchema.validate(user);
+  if (validation.error) {
+    return res.send(validation.error).status(422);
+  }
+  
+  user.name = stripHtml(user.name).result.trim();
+
   const passwordHash = bcrypt.hashSync(user.password, 10);
 
-  await db.collection("users").insertOne({ ...user, password: passwordHash });
-
-  res.sendStatus(201);
+  try {
+    await db.collection("users").insertOne({ ...user, password: passwordHash });
+    res.sendStatus(201);
+  } catch {
+    res.sendStatus(500)
+  }
 });
 
 app.post("/signin", async (req, res) => {
@@ -38,9 +77,11 @@ app.post("/signin", async (req, res) => {
   if (user && bcrypt.compareSync(password, user.password)) {
     const token = uuid();
 
-    await db.collection("sessions").insertOne({ token, userId: user._id });
-
-    res.send({ token });
+   try{ await db.collection("sessions").insertOne({ token, userId: user._id });
+     res.send({ token });
+     } catch {
+    res.sendStatus(500)
+  }
   } else {
     res.sendStatus(401);
   }
@@ -77,6 +118,13 @@ app.post("/newdata", async (req, res) => {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer ", "");
 
+  const validation = newDataSchema.validate(req.body);
+  if (validation.error) {
+    return res.send(validation.error).status(422);
+  }
+
+  record.description  = stripHtml(record.description).result.trim();
+
   if (!token) {
     return res.sendStatus(401);
   }
@@ -87,9 +135,11 @@ app.post("/newdata", async (req, res) => {
     return res.sendStatus(401);
   }
 
-  await db.collection("records").insertOne({ ...record, userId: session.userId });
-
+  try { await db.collection("records").insertOne({ ...record, userId: session.userId });
   res.sendStatus(201);
+     } catch {
+    res.sendStatus(500)
+  }
 
 });
 
@@ -106,9 +156,15 @@ app.post("/logout", async (req, res) => {
     return res.sendStatus(401);
   }
   
-  await db.collection("sessions").deleteOne({ token });
-  
+  try { await db.collection("sessions").deleteOne({ token });
   return res.sendStatus(201);
+     } catch {
+    res.sendStatus(500)
+  }
+  })
+
+app.get("/users", async (req, res) => {
+  res.send(await db.collection("users").find({}).toArray())
 })
 
 app.listen(5000);
