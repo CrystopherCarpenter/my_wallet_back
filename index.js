@@ -148,8 +148,8 @@ app.post("/logout", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
 
   if (!token) {
-    return res.sendStatus(401);
-  }
+      return res.sendStatus(401);
+    }
 
   const session = await db.collection("sessions").findOne({ token });
   if (!session) {
@@ -167,4 +167,6 @@ app.get("/users", async (req, res) => {
   res.send(await db.collection("users").find({}).toArray())
 })
 
-app.listen(5000);
+app.listen(process.env.PORT, () => {
+    console.log("Server running on port " + process.env.PORT);
+});
