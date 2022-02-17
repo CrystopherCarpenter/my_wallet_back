@@ -70,7 +70,7 @@ app.post('/signin', async (req, res) => {
 
 	const user = await db.collection('users').findOne({ email });
 
-	if (user && bcrypt.compareSync(password, user.password)) {
+	if (user && bcrypt.compareSync(user.password, password)) {
 		const token = uuid();
 
 		try {
