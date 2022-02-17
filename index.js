@@ -54,17 +54,12 @@ app.post('/signup', async (req, res) => {
 	user.name = stripHtml(user.name).result.trim();
 
 	const passwordHash = bcrypt.hashSync(user.password, 10);
-	const envio = [
-		{ passwordHash },
-		{ ...user, [password]: passwordHash },
-		{ ...user, password: passwordHash },
-	];
 
 	try {
 		await db
 			.collection('users')
 			.insertOne({ ...user, [password]: passwordHash });
-		res.send(envio).status(201);
+		res.sendStatus(201);
 	} catch {
 		res.sendStatus(500);
 	}
@@ -74,8 +69,6 @@ app.post('/signin', async (req, res) => {
 	const { email, password } = req.body;
 
 	const user = await db.collection('users').findOne({ email });
-
-	console.log(user.password);
 
 	if (user && bcrypt.compareSync(password, user.password)) {
 		const token = uuid();
@@ -89,7 +82,7 @@ app.post('/signin', async (req, res) => {
 			res.sendStatus(500);
 		}
 	} else {
-		res.send(user.password).status(401);
+		res.sendStatus(401);
 	}
 });
 
@@ -98,13 +91,13 @@ app.get('/mywallet', async (req, res) => {
 	const token = authorization?.replace('Bearer ', '');
 
 	if (!token) {
-		return res.send('token').status(401);
+		return res.sendStatus(401);
 	}
 
 	const session = await db.collection('sessions').findOne({ token });
 
 	if (!session) {
-		return res.send(session).status(401);
+		return res.sendStatus(401);
 	}
 
 	const userRecords = await db
