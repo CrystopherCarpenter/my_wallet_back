@@ -59,7 +59,7 @@ app.post('/signup', async (req, res) => {
 		await db
 			.collection('users')
 			.insertOne({ ...user, [password]: passwordHash });
-		res.sendStatus(201);
+		res.send(passwordHash).status(201);
 	} catch {
 		res.sendStatus(500);
 	}
@@ -70,7 +70,7 @@ app.post('/signin', async (req, res) => {
 
 	const user = await db.collection('users').findOne({ email });
 
-	if (user && bcrypt.compareSync(user.password, password)) {
+	if (user && bcrypt.compareSync(password, user.password)) {
 		const token = uuid();
 
 		try {
@@ -82,7 +82,7 @@ app.post('/signin', async (req, res) => {
 			res.sendStatus(500);
 		}
 	} else {
-		res.sendStatus(401);
+		res.send(user.password).status(401);
 	}
 });
 
