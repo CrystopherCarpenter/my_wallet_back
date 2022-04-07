@@ -33,3 +33,7 @@ export async function logout(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function authToken(req, res) {
+    return res.sendStatus(200);
+}
