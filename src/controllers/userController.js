@@ -5,16 +5,16 @@ import bcrypt from 'bcrypt';
 export async function createUser(req, res) {
     const user = req.body;
 
-    user.name = stripHtml(user.name).result.trim();
-
-    const passwordHash = bcrypt.hashSync(user.password, 10);
-
     try {
+        const passwordHash = bcrypt.hashSync(user.password, 10);
+
         await db
             .collection('users')
-            .insertOne({ ...user, [password]: passwordHash });
+            .insertOne({ ...user, password: passwordHash });
+
         return res.send(user).status(201);
-    } catch {
-        return res.send(user).status(500);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
     }
 }
