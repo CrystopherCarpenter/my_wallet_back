@@ -14,12 +14,12 @@ export async function signin(req, res) {
             await db
                 .collection('sessions')
                 .insertOne({ token, userId: user._id });
-            return res.send({ token });
+            return res.send(token);
         } catch {
             return res.sendStatus(500);
         }
     } else {
-        return res.send(user).status(401);
+        return res.sendStatus(401);
     }
 }
 
