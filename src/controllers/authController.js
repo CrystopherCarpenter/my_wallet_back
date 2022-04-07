@@ -5,24 +5,22 @@ import db from '../db.js';
 export async function signin(req, res) {
     const { email, password } = req.body;
 
-    const user = await db.collection('users').findOne({ email });
+    try {
+        const user = await db.collection('users').findOne({ email });
 
-    if (user && bcrypt.compareSync(password, user.password)) {
-        const token = uuid();
-        try {
-            const sessions = await db.collection('sessions').find({});
-            return res.send(sessions);
-        } catch {}
-        try {
+        if (user && bcrypt.compareSync(password, user.password)) {
+            const token = uuid();
+
             await db
                 .collection('sessions')
                 .insertOne({ token, userId: user._id });
-            return res.send(token).status(200);
-        } catch {
-            return res.sendStatus(500);
+
+            return res.send(token);
+        } else {
+            return res.sendStatus(401);
         }
-    } else {
-        return res.send(user).status(401);
+    } catch {
+        return res.sendStatus(500);
     }
 }
 
