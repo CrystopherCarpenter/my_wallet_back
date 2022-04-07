@@ -5,10 +5,7 @@ const signinSchema = joi.object({
         .string()
         .pattern(/^[a-zA-Z0-9]{3,30}$/)
         .required(),
-    email: joi
-        .string()
-        .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-        .required(),
+    email: joi.string().email().required(),
 });
 
 export default signinSchema;
