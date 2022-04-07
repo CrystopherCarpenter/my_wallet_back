@@ -14,12 +14,12 @@ export async function signin(req, res) {
             await db
                 .collection('sessions')
                 .insertOne({ token, userId: user._id });
-            res.send({ token });
+            return res.send({ token });
         } catch {
-            res.sendStatus(500);
+            return res.sendStatus(500);
         }
     } else {
-        res.sendStatus(401);
+        return res.send(user).status(401);
     }
 }
 
@@ -30,7 +30,7 @@ export async function logout(req, res) {
         await db.collection('sessions').deleteOne({ token });
         return res.sendStatus(201);
     } catch {
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 }
 
