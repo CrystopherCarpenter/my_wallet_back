@@ -8,8 +8,6 @@ export async function signin(req, res) {
     try {
         const user = await db.collection('users').findOne({ email });
 
-        res.send(user);
-
         if (user && bcrypt.compareSync(password, user.password)) {
             const token = uuid();
 
@@ -17,7 +15,7 @@ export async function signin(req, res) {
                 .collection('sessions')
                 .insertOne({ token, userId: user._id });
 
-            return res.send({ token, user });
+            return res.send({ token });
         } else {
             return res.sendStatus(401);
         }

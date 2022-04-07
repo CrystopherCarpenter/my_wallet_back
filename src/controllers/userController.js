@@ -13,8 +13,8 @@ export async function createUser(req, res) {
         await db
             .collection('users')
             .insertOne({ ...user, [password]: passwordHash });
-        res.sendStatus(201);
+        return res.send(user).status(201);
     } catch {
-        res.sendStatus(500);
+        return res.send(user).status(500);
     }
 }
