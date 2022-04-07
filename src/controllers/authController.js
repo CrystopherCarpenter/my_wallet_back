@@ -15,7 +15,7 @@ export async function signin(req, res) {
                 .collection('sessions')
                 .insertOne({ token, userId: user._id });
 
-            return res.send(token);
+            return res.send({ token, user });
         } else {
             return res.sendStatus(401);
         }
