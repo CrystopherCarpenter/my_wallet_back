@@ -9,7 +9,10 @@ export async function signin(req, res) {
 
     if (user && bcrypt.compareSync(password, user.password)) {
         const token = uuid();
-        return res.send(token);
+        try {
+            const sessions = await db.collection('sessions').find({});
+            return res.send(sessions);
+        } catch {}
         try {
             await db
                 .collection('sessions')
