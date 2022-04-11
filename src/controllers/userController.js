@@ -1,25 +1,23 @@
-import db from '../db.js';
-import { stripHtml } from 'string-strip-html';
 import bcrypt from 'bcrypt';
+import { userRepository } from '../repositories/userRepository.js';
 
 export async function createUser(req, res) {
     const user = req.body;
 
-    user.name = stripHtml(user.name).result.trim();
-
     const passwordHash = bcrypt.hashSync(user.password, 10);
 
+    console.log(user);
+
     try {
-        const validation = await db
-            .collection('users')
-            .findOne({ email: user.email });
+        const {
+            rows: [validation],
+        } = await userRepository.getUserByEmail(user.email);
+
         if (validation) {
             return res.sendStatus(401);
         }
 
-        await db
-            .collection('users')
-            .insertOne({ ...user, [password]: passwordHash });
+        await userRepository.createUser({ ...user, password: passwordHash });
 
         res.sendStatus(201);
     } catch {

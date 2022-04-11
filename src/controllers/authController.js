@@ -1,19 +1,20 @@
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import db from '../db.js';
+import { userRepository } from '../repositories/userRepository.js';
+import { authRepository } from '../repositories/authRepository.js';
 
 export async function signin(req, res) {
     const { email, password } = req.body;
 
     try {
-        const user = await db.collection('users').findOne({ email });
+        const {
+            rows: [user],
+        } = await userRepository.getUserByEmail(email);
 
         if (user && bcrypt.compareSync(password, user.password)) {
             const token = uuid();
 
-            await db
-                .collection('sessions')
-                .insertOne({ token, userId: user._id });
+            await authRepository.createSession(token, user.id);
 
             return res.send({ token });
         } else {
@@ -25,10 +26,11 @@ export async function signin(req, res) {
 }
 
 export async function logout(req, res) {
-    const token = req.headers.replace('Bearer ', '');
+    const token = req.headers.authorization.replace('Bearer ', '');
 
     try {
-        await db.collection('sessions').deleteOne({ token });
+        await authRepository.deleteSession(token);
+
         return res.sendStatus(201);
     } catch {
         return res.sendStatus(500);

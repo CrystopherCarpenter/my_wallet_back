@@ -5,9 +5,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node ./src/index.js",
-        "dev": "npx nodemon ./src/server.js"
+        "dev": "npx nodemon ./src/index.js"
     },
     "keywords": [],
     "author": "",
@@ -19,8 +18,11 @@
         "dotenv": "^15.0.0",
         "express": "^4.17.2",
         "joi": "^17.6.0",
-        "mongodb": "^4.3.1",
-        "string-strip-html": "^9.1.6",
+        "pg": "^8.7.3",
+        "sqlstring": "^2.3.3",
         "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.15"
     }
 }

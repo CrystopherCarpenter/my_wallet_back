@@ -1,4 +1,5 @@
-import db from '../db.js';
+import { authRepository } from '../repositories/authRepository.js';
+import { userRepository } from '../repositories/userRepository.js';
 
 export default async function validateToken(req, res, next) {
     const authorization = req.headers.authorization;
@@ -6,17 +7,19 @@ export default async function validateToken(req, res, next) {
     if (!token) {
         return res.sendStatus(401);
     }
-
-    const session = await db.collection('sessions').findOne({ token });
+    const {
+        rows: [session],
+    } = await authRepository.getSession(token);
     if (!session) {
         return res.sendStatus(401);
     }
-
-    const user = await db.collection('users').findOne({ _id: session.userId });
+    const {
+        rows: [user],
+    } = await userRepository.getUserById(session?.userId);
     if (!user) {
         return res.sendStatus(401);
     }
-
     res.locals.user = user;
+
     next();
 }
