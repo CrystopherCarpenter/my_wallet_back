@@ -3,11 +3,11 @@ import pkg from 'sqlstring';
 
 const { format } = pkg;
 
-async function createRecord({ type, value, description, userId }) {
+async function createRecord({ type, value, description, userId, day }) {
     const query = format(
-        `INSERT INTO transactions (type, value, description, "userId")
-        VALUES (?, ?, ?, ?)`,
-        [type, value, description, userId]
+        `INSERT INTO transactions (type, value, description, "userId", date)
+        VALUES (?, ?, ?, ?, ?)`,
+        [type, value, description, userId, day]
     );
 
     return connection.query(query);

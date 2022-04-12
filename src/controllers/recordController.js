@@ -1,4 +1,5 @@
 import { recordRepository } from '../repositories/recordRepository.js';
+import dayjs from 'dayjs';
 
 export async function getData(req, res) {
     const { user } = res.locals;
@@ -13,8 +14,9 @@ export async function getData(req, res) {
 }
 
 export async function createData(req, res) {
+    const day = dayjs().format('DD/MM');
     const { id: userId } = res.locals.user;
-    const record = { ...req.body, userId };
+    const record = { ...req.body, userId, day };
 
     try {
         await recordRepository.createRecord(record);
